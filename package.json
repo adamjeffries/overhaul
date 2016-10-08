@@ -1,0 +1,29 @@
+{
+  "name": "typedef.js",
+  "version": "1.0.0",
+  "description": "Type Definitions",
+  "main": "typedef.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adamjeffries/typedef.js.git"
+  },
+  "keywords": [
+    "type",
+    "typedef",
+    "annotate",
+    "annotation",
+    "typecheck"
+  ],
+  "author": "Adam Jeffries",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adamjeffries/typedef.js/issues"
+  },
+  "homepage": "https://github.com/adamjeffries/typedef.js",
+  "devDependencies": {
+    "mocha": "*"
+  }
+}
