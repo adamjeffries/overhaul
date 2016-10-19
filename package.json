@@ -1,10 +1,10 @@
 {
   "name": "typedef.js",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "Type Definitions",
   "main": "typedef.js",
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha test.js"
   },
   "repository": {
     "type": "git",
@@ -12,10 +12,14 @@
   },
   "keywords": [
     "type",
+    "types",
     "typedef",
     "annotate",
     "annotation",
-    "typecheck"
+    "definition",
+    "definitions",
+    "typecheck",
+    "datatype"
   ],
   "author": "Adam Jeffries",
   "license": "MIT",
@@ -23,7 +27,11 @@
     "url": "https://github.com/adamjeffries/typedef.js/issues"
   },
   "homepage": "https://github.com/adamjeffries/typedef.js",
+  "dependencies": {
+    "lodash": "*"
+  },
   "devDependencies": {
-    "mocha": "*"
+    "mocha": "*",
+    "expect.js": "*"
   }
 }
