@@ -1,7 +1,7 @@
 "use strict";
 
 const expect = require("expect.js"),
-  t = require("./typedef");
+  t = require("../index");
 
 
 describe("TypeDef", function() {

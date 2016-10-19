@@ -1,10 +1,10 @@
 {
   "name": "typedef.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Type Definitions",
-  "main": "typedef.js",
+  "main": "index.js",
   "scripts": {
-    "test": "mocha test.js"
+    "test": "mocha --recursive ./tests"
   },
   "repository": {
     "type": "git",

@@ -1,5 +1,7 @@
 # typedef.js
-JavaScript Type Definition (Type Checking, Formatting, Annotations)
+> JavaScript Type Definition (Type Checking, Formatting, Annotations, & more)
+
+[![npm version](https://badge.fury.io/js/typedef.js.svg)](https://badge.fury.io/js/typedef.js)
 
 # NOT READY FOR USE YET! - Please check back soon
 

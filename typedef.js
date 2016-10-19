@@ -69,7 +69,10 @@ TypeDef.prototype = {
  */
 TypeDef.register = function (name, fn) {
 
-  if (_.isFunction(fn)) {
+  if (arguments.length === 1 && _.isPlainObject(name)){
+    Object.keys(name).forEach(n => TypeDef.register(n, name[n]));
+
+  } else if (_.isFunction(fn)) {
 
     // Instance Accessor
     Object.defineProperty(TypeDef.prototype, name, {
@@ -98,7 +101,12 @@ TypeDef.register = function (name, fn) {
       }
     } : null;
 
-    if (is) TypeDef.register("is" + cName, is);
+    if (is) {
+      TypeDef.register("is" + cName, is);
+      TypeDef.register("isNot" + cName, function () {
+        return !is.apply(this, arguments);
+      });
+    }
 
     // TO - type caster
     let to = _.isFunction(fn.to) ? function (value) {
