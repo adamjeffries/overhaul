@@ -32,23 +32,66 @@ let TypeDef = function (def) {
   if (!(this instanceof TypeDef)) return new TypeDef(def);
 
   let ctx = function () {
-    if (this._.chain.length) {
-      this._.chain[this._.chain.length - 1].args = Array.prototype.slice.call(arguments);
+    if (ctx._.chain.length) {
+      ctx._.chain[ctx._.chain.length - 1].args = Array.prototype.slice.call(arguments);
     }
-    return this._.context;
+    return ctx;
   };
 
   // Setup TypeDef Context
-  Object.assign(ctx, {_: { context: ctx, chain: [], value: undefined, stack: [] }});
-
+  Object.assign(ctx, {_: {context: ctx, chain: [], value: undefined, stack: [] }});
   setPrototypeOf(ctx, TypeDef.prototype);
+
+  // Initialize from a serialized typedef
+  if (def && _.isString(def)) {
+    let oldChain = []; // {name, args}
+
+    // Separate method names and arguments
+    try {
+      let deserializeRegex = /(^(\w*)|\.(\w*))(?:\((.*?)\))*/g;
+      let match;
+      while (match = deserializeRegex.exec(def)) {
+        let c = {name: match[2] || match[3]};
+        if (match[4]) c.args = "[" + match[4] + "]";
+        oldChain.push(c);
+      }
+    } catch (e) {
+      throw "Unable to deserialize: " + s;
+    }
+
+    // Parse Arguments and call methods
+    oldChain.forEach(c => {
+      if (!c.name in ctx) throw "Typedef does not have method: " + c.name;
+      ctx[c.name]; // The getter will add the function to the chain
+      if (c.args) {
+        try {
+          c.args = JSON.parse(c.args);
+        } catch (e) {}
+        if (!_.isArray(c.args)) throw "Unable to deserialize arguments: '" + c.args + "'";
+        ctx._.chain[ctx._.chain.length - 1].args = c.args;
+      }
+    });
+  }
+
   return ctx;
 };
 
 TypeDef.prototype = {
 
   serialize () {
-    return this.chain.map(c => c.name).join(".");
+    return this._.chain.map(c => {
+      let str = c.name;
+      if (c.args.length) {
+        str += "(" + c.args.map((v, i) => {
+          try {
+            return JSON.stringify(v);
+          } catch (e) {
+            throw "Unable to serialize argument " + (i + 1) + " of " + c.name;
+          }
+        }).join(",") + ")";
+      }
+      return str;
+    }).join(".");
   },
 
   definition () {
@@ -97,12 +140,12 @@ let register = function (name, fn, argNames) {
   Object.defineProperty(TypeDef.prototype, name, {
     get () {
       this._.chain.push({name, fn, args: []});
-      return this._.context;
+      return this;
     }
   });
 
-  // Static Accessor
-  Object.defineProperty(TypeDef, name, { get: () => (new TypeDef())[name] });
+  // Static Accessor (weird impl, I know)
+  Object.defineProperty(TypeDef, name, { get: () => TypeDef()[name]});
 
 };
 
@@ -113,9 +156,6 @@ TypeDef.register = function (name, fn) {
 
   } else if (_.isFunction(fn)) {
     register(name, fn);
-
-    // Return the Class
-    return TypeDef;
 
   } else if (_.isPlainObject(fn) && (fn.is || fn.to || fn.fn)) {
 
@@ -174,6 +214,7 @@ TypeDef.register = function (name, fn) {
 
   }
 
+  return TypeDef;
 };
 
 

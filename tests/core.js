@@ -7,12 +7,14 @@ const expect = require("expect.js"),
 describe("TypeDef", function() {
 
   it("Should be an instance", function () {
-    let d = new t();
-    let d2 = t();
-    let d3 = t.is;
-    expect(d instanceof t).to.be.ok();
-    expect(d2 instanceof t).to.be.ok();
-    expect(d3 instanceof t).to.be.ok();
+    expect(new t() instanceof t).to.be.ok();
+    expect(t() instanceof t).to.be.ok();
+    expect(t.is().is() instanceof t).to.be.ok();
+    expect(t.is.is instanceof t).to.be.ok();
+    expect(t.is.is() instanceof t).to.be.ok();
+    expect(t.is() instanceof t).to.be.ok();
+    expect(t.is().is instanceof t).to.be.ok();
+    expect(t.is().is() instanceof t).to.be.ok();
   });
 
   it("Can register function definitions", function () {
@@ -69,6 +71,35 @@ describe("TypeDef", function() {
     expect(def[1][1]).to.eql({a: 8, b: 9});
     expect(def[2][0]).to.be("toAbc");
     expect(def[2][1]).to.not.be.ok();
+  });
+
+  it("Can serialize", function () {
+
+    t.register("xyz", {
+      is (value, a, b) {
+        return value === "xyz";
+      },
+      to (value) {
+        return "XYZ";
+      }
+    });
+
+    let s = t.xyz.isXyz(1,"hello.",true,[1,"a,b",false]).toXyz({a:1, b: "3"}).serialize();
+    expect(s).to.be('xyz.isXyz(1,"hello.",true,[1,"a,b",false]).toXyz({"a":1,"b":"3"})');
+    expect(function () {
+      var a = {}; a.a = a; // Create a circular dependency
+      t.xyz.isXyz(1,2,a).serialize();
+    }).to.throwError(/Unable to serialize argument 3 of isXyz/);
+  });
+
+  it("Can deserialize", function () {
+    t.register("jkl", function (value, a, b) { return value + a + b; });
+    t.register("mno", function (value, arr, obj) { return value + arr[0] + obj.a; });
+
+    let def1 = t.jkl(1,2).mno([2, "asdf"], {a: 3, b: "234"});
+    let def2 = t(def1.serialize());
+
+    expect(def1.value(3)).to.be(def2.value(3));
   });
 
 });
