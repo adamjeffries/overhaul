@@ -49,4 +49,26 @@ describe("TypeDef", function() {
     }).to.throwError(/Expected string to be a foo/);
   });
 
+  it("Can get definitions", function () {
+
+    t.register("abc", {
+      is (value, a, b) {
+        return value === "abc";
+      },
+      to (value) {
+        return "ABC";
+      }
+    });
+
+    let def = t.abc.isAbc(8,9).toAbc(10).definition();
+
+    expect(def).to.have.length(3);
+    expect(def[0][0]).to.be("abc");
+    expect(def[0][1]).to.not.be.ok();
+    expect(def[1][0]).to.be("isAbc");
+    expect(def[1][1]).to.eql({a: 8, b: 9});
+    expect(def[2][0]).to.be("toAbc");
+    expect(def[2][1]).to.not.be.ok();
+  });
+
 });
