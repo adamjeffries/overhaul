@@ -18,8 +18,59 @@ module.exports = {
   },
 
   array: {
-    is: _.isArray,
-    to: _.toArray // slice arguments too
+    is (value, deep) {
+      if (!_.isArray(value)) return false;
+
+      if (deep) {
+        if (_.isArray(deep)) {
+          return deep.every((d, i) => {
+            if (i >= value.length) return false;
+            if (d && _.isFunction(d.value)) {
+              return !!d.value(value[i]);
+            } else if (_.isFunction(d)) {
+              return !!d(value[i]);
+            } else {
+              return false;
+            }
+          });
+        } else if (_.isFunction(deep.value)) {
+          return value.every(v => !!deep.value(v));
+
+        } else if (_.isFunction(deep)) {
+          return value.every(v => !!deep(v));
+        }
+      }
+
+      return true;
+    },
+    to (value, deep) {
+      if (_.isArguments(value)) {
+        value = Array.prototype.slice.call(value);
+      } else {
+        value = _.toArray(value);
+      }
+
+      if (deep && _.isArray(value)) {
+        if (_.isArray(deep)) {
+          deep.forEach((d, i) => {
+            if (i >= value.length) return;
+            if (d && _.isFunction(d.value)) {
+              value[i] = d.value(value[i]);
+            } else if (_.isFunction(d)) {
+              value[i] = d(value[i]);
+            }
+          });
+
+        } else if (_.isFunction(deep.value)) {
+          return value.map(v => deep.value(v));
+
+        } else if (_.isFunction(deep)) {
+          return value.map(v => deep(v));
+        }
+      }
+
+      return value;
+    }
   },
 
   boolean: {
