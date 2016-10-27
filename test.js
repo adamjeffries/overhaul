@@ -14,6 +14,7 @@ describe("Types", function () {
           return value === "bar";
         },
         to (value) {
+          if (value === "bar") return "bar";
           return "FOO";
         }
       });
@@ -89,7 +90,22 @@ describe("Types", function () {
     });
 
     it("Can Cast Deep", function () {
-      //expect(t.toArray(t.toNumber).value(["1", "two", 3])).to.eql([1,NaN,3]);
+      var v1 = t.toArray(t.toNumber).value(["1", "two", 3]);
+
+      expect(v1).to.have.length(3);
+      expect(v1[0]).to.be(1);
+      expect(v1[0]).to.be.a("number");
+      expect(isNaN(v1[1])).to.be.ok();
+      expect(v1[2]).to.be(3);
+
+      var v2 = t.toArray([t.toNumber, t.toString, t.toArray(t.toNumber)]).value(["1", 2, ["3", "asdf"], "four"]);
+      expect(v2).to.have.length(4);
+      expect(v2[0]).to.be.a("number");
+      expect(v2[1]).to.be.a("string");
+      expect(v2[2]).to.have.length(2);
+      expect(v2[2][0]).to.be.a("number");
+      expect(isNaN(v2[2][1])).to.be.ok();
+      expect(v2[3]).to.be("four");
     });
 
     it("Can Run", function () {

@@ -61,7 +61,6 @@ TypeDef.register = function (name, fn) {
     // TO - type caster
     if (_.isFunction(fn.to)) {
       register("to" + cName, function (value) {
-        if (is && is.apply(this, arguments)) return value;
         try {
           return fn.to.apply(this, arguments);
         } catch (e) {}
@@ -72,7 +71,7 @@ TypeDef.register = function (name, fn) {
     if (_.isFunction(fn.fn)) {
       register(name, fn.fn);
 
-      // Generic FN - Use "IS" and throw
+    // Generic FN - Use "IS" and throw
     } else if (is) {
       register(name, function (value) {
         if (typeof value === "undefined") return;
@@ -80,14 +79,14 @@ TypeDef.register = function (name, fn) {
         let msg = "Expected " + (typeof value) + " to be " + aOrAn(name) + " " + name;
 
         // If a stack has been started (key and value) - then make a better error message
-        if (this.stack && this.stack.length) {
-          let last = _.last(this.stack);
-          if (_.isArray(last.value)) {
-            msg += " at index '" + this.key + "'";
-          } else if (_.isPlainObject(last.value)) {
-            msg += " for property '" + this.key + "'";
-          }
-        }
+        //if (this.stack && this.stack.length) {
+        //  let last = _.last(this.stack);
+        //  if (_.isArray(last.value)) {
+        //    msg += " at index '" + this.key + "'";
+        //  } else if (_.isPlainObject(last.value)) {
+        //    msg += " for property '" + this.key + "'";
+        //  }
+        //}
 
         throw msg;
       }, isArgNames);

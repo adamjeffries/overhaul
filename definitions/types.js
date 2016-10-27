@@ -11,6 +11,7 @@ module.exports = {
   arguments: {
     is: _.isArguments,
     to (value) {
+      if (_.isArguments(value)) return value;
       if (_.isArray(value)) {
         return (function () { return arguments; }).apply(null, value);
       }
@@ -18,21 +19,27 @@ module.exports = {
   },
 
   array: {
-    is (value, deep) {
+    is (value, deep, extras) { // extras=allow(true or undefined), reject(false)
       if (!_.isArray(value)) return false;
 
       if (deep) {
         if (_.isArray(deep)) {
-          return deep.every((d, i) => {
-            if (i >= value.length) return false;
-            if (d && _.isFunction(d.value)) {
-              return !!d.value(value[i]);
-            } else if (_.isFunction(d)) {
-              return !!d(value[i]);
-            } else {
-              return false;
+          return value.every((v, i) => {
+            if (i >= deep.length) {
+              if (extras === "reject") {
+                throw "Array length expected to be " + deep.length + " and was " + value.length;
+              } else {
+                return true;
+              }
+            } else if (deep[i] && _.isFunction(deep[i].value)) {
+              return !!deep[i].value(v);
+            } else if (_.isFunction(deep[i])) {
+              return !!deep[i](v);
             }
+
+            return false;
           });
+
         } else if (_.isFunction(deep.value)) {
           return value.every(v => !!deep.value(v));
 
@@ -43,7 +50,8 @@ module.exports = {
 
       return true;
     },
-    to (value, deep) {
+    to (value, deep, extras) { // extras=allow(default), omit(false), reject
+
       if (_.isArguments(value)) {
         value = Array.prototype.slice.call(value);
       } else {
@@ -51,15 +59,25 @@ module.exports = {
       }
 
       if (deep && _.isArray(value)) {
+
         if (_.isArray(deep)) {
-          deep.forEach((d, i) => {
-            if (i >= value.length) return;
-            if (d && _.isFunction(d.value)) {
-              value[i] = d.value(value[i]);
-            } else if (_.isFunction(d)) {
-              value[i] = d(value[i]);
+          let arr = [];
+          value.forEach((v, i) => {
+            if (i >= deep.length) {
+              if (extras === "reject") {
+                throw "Array length expected to be " + deep.length + " and was " + value.length;
+              } else if (extras === "omit" || extras === false) {
+                return;
+              }
+            } else if (deep[i] && _.isFunction(deep[i].value)) {
+              v = deep[i].value(v);
+            } else if (_.isFunction(deep[i])) {
+              v = deep[i](v);
             }
+            arr.push(v);
           });
+
+          return arr;
 
         } else if (_.isFunction(deep.value)) {
           return value.map(v => deep.value(v));
@@ -76,6 +94,8 @@ module.exports = {
   boolean: {
     is: _.isBoolean,
     to (value) {
+      if (_.isBoolean(value)) return value;
+
       let lowerValue = (value + "").toLowerCase();
       if (lowerValue === "t" || lowerValue === "true") return true;
       if (lowerValue === "f" || lowerValue === "false") return false;
@@ -86,6 +106,7 @@ module.exports = {
   date: {
     is: _.isDate,
     to (value) {
+      if (_.isDate(value)) return value;
       //TODO
     }
   },
@@ -93,6 +114,7 @@ module.exports = {
   element: {
     is: _.isElement,
     to (value) {
+      if (_.isElement(value)) return value;
       if (_.isString(value)) {
         var div = document.createElement("div");
         div.innerHTML = value;
@@ -108,6 +130,7 @@ module.exports = {
   error: {
     is: _.isError,
     to (value) {
+      if (_.isError(value)) return value;
       if (_.isString(value)) {
         return new Error(value);
       } else if (_.isObject(value) && value.message) {
@@ -125,6 +148,7 @@ module.exports = {
   function: {
     is: _.isFunction,
     to (value, name) {
+      if (_.isFunction(value)) return value;
       if (_.isString(value)) {
         return new Function("return " + "function " + (name || "") + "() { " + value + "; }")();
       } else {
@@ -138,6 +162,7 @@ module.exports = {
       return value instanceof Clazz;
     },
     to (value, Clazz) {
+      if (value instanceof Clazz) return value;
       if (_.isFunction(Clazz)) {
         if (_.isArray(value)) {
           var instance = Object.create(Clazz.prototype);
@@ -194,6 +219,7 @@ module.exports = {
   regExp: {
     is: _.isRegExp,
     to (value, flags) {
+      if (_.isRegExp(value)) return value;
       if (_.isString(value)) {
         return new RegExp(value, _.isString(flags) ? flags : "");
       }
