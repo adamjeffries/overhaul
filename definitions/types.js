@@ -26,25 +26,25 @@ module.exports = {
         if (_.isArray(deep)) {
           return value.every((v, i) => {
             if (i >= deep.length) {
-              if (extras === "reject") {
+              if (extras === "reject" || extras === false) {
                 throw "Array length expected to be " + deep.length + " and was " + value.length;
               } else {
                 return true;
               }
             } else if (deep[i] && _.isFunction(deep[i].value)) {
-              return !!deep[i].value(v);
+              return !!deep[i].value(v, this.stack.concat([{k: i, v: value}]));
             } else if (_.isFunction(deep[i])) {
-              return !!deep[i](v);
+              return !!deep[i](v, i, value);
             }
 
             return false;
           });
 
         } else if (_.isFunction(deep.value)) {
-          return value.every(v => !!deep.value(v));
+          return value.every((v, i) => !!deep.value(v, this.stack.concat([{k: i, v: value}])));
 
         } else if (_.isFunction(deep)) {
-          return value.every(v => !!deep(v));
+          return value.every((v, i) => !!deep(v, i, value));
         }
       }
 
@@ -70,9 +70,9 @@ module.exports = {
                 return;
               }
             } else if (deep[i] && _.isFunction(deep[i].value)) {
-              v = deep[i].value(v);
+              v = deep[i].value(v, this.stack.concat([{k: i, v: value}]));
             } else if (_.isFunction(deep[i])) {
-              v = deep[i](v);
+              v = deep[i](v, i, value);
             }
             arr.push(v);
           });
@@ -80,10 +80,10 @@ module.exports = {
           return arr;
 
         } else if (_.isFunction(deep.value)) {
-          return value.map(v => deep.value(v));
+          return value.map((v, i) => deep.value(v, this.stack.concat([{k: i, v: value}])));
 
         } else if (_.isFunction(deep)) {
-          return value.map(v => deep(v));
+          return value.map((v, i) => deep(v, i, value));
         }
       }
 
@@ -107,7 +107,8 @@ module.exports = {
     is: _.isDate,
     to (value) {
       if (_.isDate(value)) return value;
-      //TODO
+      if (_.isString(value)) value = Date.parse(value);
+      if (_.isNumber(value) && !_.isNaN(value)) return new Date(value);
     }
   },
 
@@ -200,20 +201,76 @@ module.exports = {
   },
 
   object: {
-    is (value, def) {
-      if (!_.isObject(value)) return false;
+    is (value, deep, extras) { // extras=allow(true or undefined), reject(false)
+      if (!_.isPlainObject(value)) return false;
 
-      //{extras: "allow|ignore|reject"}
+      let keys = Object.keys(value);
 
+      if (deep) {
+        if (_.isPlainObject(deep)) {
+          if ((extras === false || extras === "reject") && keys.length !== Object.keys(deep).length) return false;
+
+          return keys.every((n, i) => {
+            if (!(n in deep)) {
+              return !(extras === false || extras === "reject");
+
+            } else if (deep[n] && _.isFunction(deep[n].value)) {
+              return !!deep[n].value(value[n], this.stack.concat([{k: n, v: value}]));
+
+            } else if (_.isFunction(deep[n])) {
+              return !!deep[n](value[n], n, value);
+            }
+
+            return false;
+          });
+
+        } else if (_.isFunction(deep.value)) {
+          return keys.every(n => !!deep.value(value[n], this.stack.concat([{k: n, v: value}])));
+
+        } else if (_.isFunction(deep)) {
+          return keys.every(n => !!deep(value[n], n, value));
+        }
+      }
+
+      return true;
     },
-    to (value, def) {
-      //TODO
-    }
-  },
+    to (value, deep, extras) { // extras=allow(default), omit(false), reject
+      if (!_.isPlainObject(value)) value = _.toPlainObject(value);
 
-  plainObject: {
-    is: _.isPlainObject,
-    to: _.toPlainObject
+      if (deep && _.isPlainObject(value)) {
+        let keys = Object.keys(value);
+
+        if (_.isPlainObject(deep)) {
+
+          let omitted = {};
+          Object.keys(deep).forEach(n => {
+            if (deep[n] && _.isFunction(deep[n].value)) {
+              omitted[n] = value[n] = deep[n].value(value[n], this.stack.concat([{k: n, v: value}]));
+            } else if (_.isFunction(deep[n])) {
+              omitted[n] = value[n] = deep[n](value[n], n, value);
+            } else {
+              omitted[n] = value[n] = deep[n];
+            }
+          });
+
+          if (extras === "reject" && Object.keys(value).length > Object.keys(deep).length) {
+            throw "Object contains unapproved keys";
+          } else if (extras === "omit" || extras === false) {
+            return omitted;
+          }
+
+        } else if (_.isFunction(deep.value)) {
+          keys.forEach(n => {
+            value[n] = deep.value(value[n], this.stack.concat([{k: n, v: value}]));
+          });
+
+        } else if (_.isFunction(deep)) {
+          keys.forEach(n => value[n] = deep(value[n], n, value));
+        }
+      }
+
+      return value;
+    }
   },
 
   regExp: {

@@ -29,6 +29,17 @@ let TypeDef = chainable();
 
 
 /**
+ * Value - support stack (k, v)
+ */
+let originalValue = TypeDef.prototype.value;
+TypeDef.prototype.value = function (value, stack) {
+  this._context.stack = stack || [];
+  return originalValue.call(this, value);
+};
+
+
+
+/**
  * Upgrade the default register to support (name, {is, to, fn})
  */
 let register = TypeDef.register;
@@ -75,20 +86,25 @@ TypeDef.register = function (name, fn) {
     } else if (is) {
       register(name, function (value) {
         if (typeof value === "undefined") return;
-        if (is.apply(this, arguments)) return value;
-        let msg = "Expected " + (typeof value) + " to be " + aOrAn(name) + " " + name;
 
-        // If a stack has been started (key and value) - then make a better error message
-        //if (this.stack && this.stack.length) {
-        //  let last = _.last(this.stack);
-        //  if (_.isArray(last.value)) {
-        //    msg += " at index '" + this.key + "'";
-        //  } else if (_.isPlainObject(last.value)) {
-        //    msg += " for property '" + this.key + "'";
-        //  }
-        //}
+        // Check "is" without any safety nets
+        if (fn.is.apply(this, arguments)) {
+          return value;
+        } else {
+          let msg = "Expected " + (typeof value) + " to be " + aOrAn(name) + " " + name;
 
-        throw msg;
+           //If a stack has been started - make a better error message
+          if (this.stack && this.stack.length) {
+            let last = _.last(this.stack);
+            if (_.isArray(last.v)) {
+              msg += " at index '" + last.k + "'";
+            } else if (_.isPlainObject(last.v)) {
+              msg += " for property '" + last.k + "'";
+            }
+          }
+
+          throw msg;
+        }
       }, isArgNames);
     }
 
