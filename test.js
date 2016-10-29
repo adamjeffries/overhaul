@@ -325,3 +325,53 @@ describe("Traversals", function () {
   });
 
 });
+
+
+
+// Spot checking Lodash Methods
+describe("Lodash", function () {
+
+  it("Array Method Spot Check", function () {
+    expect(t.fill(2).value(["a", "b", "c"])).to.eql([2, 2, 2]);
+  });
+
+  it("Collection Method Spot Check", function () {
+    expect(t.filter({user: "fred"}).index(0).value([
+      { user: "barney", age: 36, active: true },
+      { user: "fred", age: 40, active: false }
+    ])).to.eql({user: "fred", age: 40, active: false});
+  });
+
+  it("Date Method Spot Check", function () {
+    expect(t.now.value("asdf")).to.be.a("number");
+  });
+
+  it("Function Method Spot Check", function () {
+    expect(t.flip.value(function () { return Array.prototype.slice.call(arguments); })(1, 2, 3)).to.eql([3, 2, 1]);
+  });
+
+  it("Lang Method Spot Check", function () {
+    expect(t.lt(3).value(1)).to.be.ok();
+  });
+
+  it("Math Method Spot Check", function () {
+    expect(t.max.value([2, 6, 3, 1])).to.be(6);
+  });
+
+  it("Number Method Spot Check", function () {
+    expect(t.clamp(-5, 5).value(-10)).to.be(-5);
+  });
+
+  it("Object Method Spot Check", function () {
+    expect(t.pick(["a", "c"]).value({a: 1, b: 2, c: 3, d: 4})).to.eql({a: 1, c: 3});
+  });
+
+  it("String Method Spot Check", function () {
+    expect(t.camelCase.value("__FOO_BAR__")).to.be("fooBar");
+  });
+
+  it("Util Method Spot Check", function () {
+    expect(t.range.value(4)).to.eql([0,1,2,3]);
+  });
+
+});
