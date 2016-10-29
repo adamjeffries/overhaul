@@ -259,3 +259,69 @@ describe("Types", function () {
   });
 
 });
+
+
+
+describe("Traversals", function () {
+
+  it("Can Copy", function () {
+    expect(t.copy("a", "c").value({a: 1, b: 2})).to.eql({a: 1, b: 2, c: 1});
+    expect(t.key("a").copy("c").parent.value({a: 1, b: 2})).to.eql({a: 1, b: 2, c: 1});
+  });
+
+  it("Can Delete", function () {
+    expect(t.delete("a").value({a: 1, b: 2})).to.eql({b: 2});
+    expect(function () {
+      t.delete("a").value("asdf");
+    }).to.throwError(/Object required to delete key/);
+
+    var o2 = t.key("a").delete.value({a: 1, b: 2});
+    expect(t.key("a").delete.value({a: 1, b: 2})).to.eql({b: 2});
+    expect(t.delete.value("asdf")).to.not.be.ok();
+    expect(t.index(1).delete.value([1,2,3])).to.eql([1,3]);
+  });
+
+  it("Can Freeze", function () {
+    var o = {a: 1, b: 2};
+    var o2 = t.freeze.value(o);
+
+    expect(function () {
+      o2.a = 2;
+    }).to.throwError(/Cannot assign to read only property 'a' of #<Object>/);
+  });
+
+  it("Can get by index", function () {
+    expect(t.index(1).value([1,2,3])).to.be(2);
+    expect(t.index(1).index(1).value([1,[4,5,6],3])).to.be(5);
+    expect(function () {
+      t.index(1).value("asdf");
+    }).to.throwError(/Index expects an array/);
+  });
+
+  it("Can get by key", function () {
+    expect(t.key("b").value({a: 1, b: 2})).to.be(2);
+    expect(t.key(1).value([1,2,3])).to.be(2);
+    expect(t.key("b").key("f").value({a: 1, b: {e: 5, f: 6}, c: 3})).to.be(6);
+    expect(t.key(1).key(1).value([1,[4,5,6],3])).to.be(5);
+    expect(function () {
+      t.key("a").value("asdf");
+    }).to.throwError(/key expects an array or object/);
+  });
+
+  it("Can Move", function () {
+    expect(t.move("a", "c").value({a: 1, b: 2})).to.eql({b: 2, c: 1});
+    expect(t.move("a", "c").value({b: 2})).to.eql({b: 2, c: undefined});
+    expect(t.key("a").move("c").parent.value({a: 1, b: 2})).to.eql({b: 2, c: 1});
+    expect(t.key("a").move("c").parent.value({b: 2})).to.eql({b: 2, c: undefined});
+  });
+
+  it("Can get parent", function () {
+    expect(t.key("b").key("f").parent.parent.key("a").value({a: 1, b: {e: 5, f: 6}, c: 3})).to.be(1);
+    expect(t.parent.value("asdf")).to.not.be.ok();
+  });
+
+  it("Can get siblings", function () {
+    expect(t.key("a").sibling("b").value({a: 1, b: 2})).to.be(2);
+  });
+
+});

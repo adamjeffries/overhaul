@@ -2,7 +2,8 @@
 
 var typedef = require("./typedef");
 
-// Register Default Definitions
+// Register Definitions
 typedef.register(require("./definitions/types"));
+typedef.register(require("./definitions/traversals"));
 
 module.exports = typedef;
