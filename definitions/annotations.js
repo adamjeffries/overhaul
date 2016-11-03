@@ -13,18 +13,8 @@ module.exports = {
   },
 
   deprecated (value, message) {
-    this.deprecated = message;
+    this.deprecated = message || true;
     return value;
-  },
-
-  default (value, defaultValue) {
-    if (typeof value === "undefined") return defaultValue;
-    return value;
-  },
-
-  required (value) {
-    if (typeof value === "undefined") throw "Missing required value";
-    return valu;
   }
 
 };

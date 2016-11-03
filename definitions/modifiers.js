@@ -4,6 +4,19 @@ const _ = require("lodash");
 
 module.exports = {
 
+  default (value, defaultValue) {
+    if (typeof value === "undefined") return defaultValue;
+    return value;
+  },
+
+  freeze (value) {
+    if (_.isObject(value)) {
+      return Object.freeze(value);
+    } else {
+      throw "freeze expects an object";
+    }
+  },
+
   noop () {
     return _.noop;
   },
@@ -23,11 +36,13 @@ module.exports = {
     }
   },
 
+  required (value) {
+    if (typeof value === "undefined") throw "Missing required value";
+    return value;
+  },
+
   stringify (value) {
     return JSON.stringify(value);
   }
 
 };
-
-
-

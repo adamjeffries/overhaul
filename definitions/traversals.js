@@ -51,14 +51,6 @@ module.exports = {
     }
   },
 
-  freeze (value) {
-    if (_.isObject(value)) {
-      return Object.freeze(value);
-    } else {
-      throw "freeze expects an object";
-    }
-  },
-
   index (value, index) {
     if (arguments.length != 2) throw "index is required";
     if (_.isArray(value)) {

@@ -281,15 +281,6 @@ describe("Traversals", function () {
     expect(t.index(1).delete.value([1,2,3])).to.eql([1,3]);
   });
 
-  it("Can Freeze", function () {
-    var o = {a: 1, b: 2};
-    var o2 = t.freeze.value(o);
-
-    expect(function () {
-      o2.a = 2;
-    }).to.throwError(/Cannot assign to read only property 'a' of #<Object>/);
-  });
-
   it("Can get by index", function () {
     expect(t.index(1).value([1,2,3])).to.be(2);
     expect(t.index(1).index(1).value([1,[4,5,6],3])).to.be(5);
@@ -330,6 +321,20 @@ describe("Traversals", function () {
 
 describe("Modifiers", function () {
 
+  it("Default", function () {
+    expect(t.default("hello").value("anything")).to.be("anything");
+    expect(t.default("hello").value()).to.be("hello");
+  });
+
+  it("Can Freeze", function () {
+    var o = {a: 1, b: 2};
+    var o2 = t.freeze.value(o);
+
+    expect(function () {
+      o2.a = 2;
+    }).to.throwError(/Cannot assign to read only property 'a' of #<Object>/);
+  });
+
   it("Noop", function () {
     expect(t.noop.value("anything")).to.be.a("function");
     expect(t.noop().value("anything")()).to.not.be.ok();
@@ -339,6 +344,13 @@ describe("Modifiers", function () {
     expect(t.parse.value('"something"')).to.be("something");
     expect(t.parse.value('{"a":1,"b":"two","c":true}')).to.eql({a: 1, b: "two", c: true});
     expect(t.parse.value('{garbage[')).to.be(undefined);
+  });
+
+  it("Required", function () {
+    expect(t.required.value("anything")).to.be("anything");
+    expect(function () {
+      t.required.value();
+    }).to.throwError(/Missing required value/);
   });
 
   it("Stringify", function () {
