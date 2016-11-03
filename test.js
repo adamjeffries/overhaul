@@ -328,6 +328,29 @@ describe("Traversals", function () {
 
 
 
+describe("Modifiers", function () {
+
+  it("Noop", function () {
+    expect(t.noop.value("anything")).to.be.a("function");
+    expect(t.noop().value("anything")()).to.not.be.ok();
+  });
+
+  it("Parse", function () {
+    expect(t.parse.value('"something"')).to.be("something");
+    expect(t.parse.value('{"a":1,"b":"two","c":true}')).to.eql({a: 1, b: "two", c: true});
+    expect(t.parse.value('{garbage[')).to.be(undefined);
+  });
+
+  it("Stringify", function () {
+    expect(t.stringify.value({a: 1, b: "two", c: true})).to.be('{"a":1,"b":"two","c":true}');
+    expect(t.stringify.value("something")).to.be('"something"');
+    expect(t.stringify.value([1, "2", true])).to.be('[1,"2",true]');
+  });
+
+});
+
+
+
 // Spot checking Lodash Methods
 describe("Lodash", function () {
 
