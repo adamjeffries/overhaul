@@ -43,7 +43,7 @@ TypeDef.prototype.value = function (value, stack) {
  * Upgrade the default register to support (name, {is, to, fn})
  */
 let register = TypeDef.register;
-TypeDef.register = function (name, fn) {
+TypeDef.register = function (name, fn, argNames) {
   if (_.isPlainObject(name)) {
     Object.keys(name).forEach(n => TypeDef.register(n, name[n]));
 
@@ -80,36 +80,41 @@ TypeDef.register = function (name, fn) {
 
     // FN - custom definition
     if (_.isFunction(fn.fn)) {
-      register(name, fn.fn);
+      TypeDef.register(name, fn.fn);
 
     // Generic FN - Use "IS" and throw
     } else if (is) {
-      register(name, function (value) {
+      TypeDef.register(name, function (value) {
         if (typeof value === "undefined") return;
 
         // Check "is" without any safety nets
         if (fn.is.apply(this, arguments)) {
           return value;
         } else {
-          let msg = "Expected " + (typeof value) + " to be " + aOrAn(name) + " " + name;
-
-          //If a stack has been started - make a better error message
-          if (this.stack && this.stack.length) {
-            let last = _.last(this.stack);
-            if (_.isArray(last.v)) {
-              msg += " at index '" + last.k + "'";
-            } else if (_.isPlainObject(last.v)) {
-              msg += " for property '" + last.k + "'";
-            }
-          }
-
-          throw msg;
+          throw "Expected " + (typeof value) + " to be " + aOrAn(name) + " " + name;
         }
       }, isArgNames);
     }
 
   } else {
-    register(name, fn);
+    register(name, function () {
+      try {
+        return fn.apply(this, arguments);
+
+      } catch (err) {
+        //If a stack has been started - make a better error message
+        if (this.stack && this.stack.length) {
+          let last = _.last(this.stack);
+          if (_.isArray(last.v)) {
+            err += " at index '" + last.k + "'";
+          } else if (_.isPlainObject(last.v)) {
+            err += " for property '" + last.k + "'";
+          }
+        }
+
+        throw err;
+      }
+    }, argNames || getArgumentNames(fn).slice(1));
   }
 
   return TypeDef;
@@ -118,7 +123,25 @@ TypeDef.register = function (name, fn) {
 
 
 /**
- * Basic Type Checker
+ * Basic Tester
+ */
+TypeDef.register("test", function (value, fn) {
+  if (_.isFunction(fn)) {
+    let rtn = fn(value);
+    if (typeof rtn === "string") {
+      throw rtn;
+    } else if (rtn === false) {
+      throw "Test failed for value '" + value + "'";
+    }
+  }
+  
+  return value;
+});
+
+
+
+/**
+ * Basic Value Tester
  */
 TypeDef.register("is", function (value, fn) {
   try {

@@ -428,4 +428,18 @@ describe("Annotations", function () {
     expect(t.example("Hello World").definition()[0].values.example).to.be("Hello World");
   });
 
+  it("Can have values", function () {
+    expect(t.values([4,5,6]).value(5)).to.be(5);
+    expect(function () {
+      t.values([4,5,6]).value(7);
+    }).to.throwError(/7 is not an allowed value/);
+  });
+
+  it("Can be within", function () {
+    expect(t.within(0, 10).value(5)).to.be(5);
+    expect(function () {
+      t.within(0, 10).value(15);
+    }).to.throwError(/Expected 15 to be within 0 and 10/);
+  });
+
 });

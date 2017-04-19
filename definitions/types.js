@@ -97,19 +97,7 @@ const TYPES = {
         return TYPES.array.to.call(this, value, deep, extras);
 
       } else {
-        let msg = "Expected " + (typeof value) + " to be an array";
-
-        //If a stack has been started - make a better error message
-        if (this.stack && this.stack.length) {
-          let last = _.last(this.stack);
-          if (_.isArray(last.v)) {
-            msg += " at index '" + last.k + "'";
-          } else if (_.isPlainObject(last.v)) {
-            msg += " for property '" + last.k + "'";
-          }
-        }
-
-        throw msg;
+        throw "Expected " + (typeof value) + " to be an array";
       }
     }
   },
@@ -304,19 +292,7 @@ const TYPES = {
         return TYPES.object.to.call(this, value, deep, extras);
 
       } else {
-        let msg = "Expected " + (typeof value) + " to be an object";
-
-        //If a stack has been started - make a better error message
-        if (this.stack && this.stack.length) {
-          let last = _.last(this.stack);
-          if (_.isArray(last.v)) {
-            msg += " at index '" + last.k + "'";
-          } else if (_.isPlainObject(last.v)) {
-            msg += " for property '" + last.k + "'";
-          }
-        }
-
-        throw msg;
+        throw "Expected " + (typeof value) + " to be an object";
       }
     }
   },
