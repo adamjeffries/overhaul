@@ -93,7 +93,7 @@ TypeDef.register = function (name, fn) {
         } else {
           let msg = "Expected " + (typeof value) + " to be " + aOrAn(name) + " " + name;
 
-           //If a stack has been started - make a better error message
+          //If a stack has been started - make a better error message
           if (this.stack && this.stack.length) {
             let last = _.last(this.stack);
             if (_.isArray(last.v)) {

@@ -332,7 +332,7 @@ describe("Modifiers", function () {
 
     expect(function () {
       o2.a = 2;
-    }).to.throwError(/Cannot assign to read only property 'a' of #<Object>/);
+    }).to.throwError(/Cannot assign to read only property 'a' of object '#<Object>'/);
   });
 
   it("Noop", function () {
@@ -407,6 +407,25 @@ describe("Lodash", function () {
 
   it("Util Method Spot Check", function () {
     expect(t.range.value(4)).to.eql([0,1,2,3]);
+  });
+
+});
+
+
+
+describe("Annotations", function () {
+
+  it("Can Deprecate", function () {
+    expect(t.deprecated.definition()[0].values.message).to.not.be.ok();
+    expect(t.deprecated("Please X Instead").definition()[0].values.message).to.be("Please X Instead");
+  });
+
+  it("Can Describe", function () {
+    expect(t.description("Hello World").definition()[0].values.description).to.be("Hello World");
+  });
+
+  it("Can add Examples", function () {
+    expect(t.example("Hello World").definition()[0].values.example).to.be("Hello World");
   });
 
 });

@@ -5,7 +5,7 @@ const typedef = require("./typedef");
 // Register Definitions
 typedef.register(require("./definitions/types"));
 typedef.register(require("./definitions/traversals"));
-typedef.register(require("./definitions/metas"));
+typedef.register(require("./definitions/annotations"));
 typedef.register(require("./definitions/modifiers"));
 
 // Lodash - prevent overriding existing methods
