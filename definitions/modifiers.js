@@ -5,7 +5,7 @@ const _ = require("lodash");
 module.exports = {
 
   default (value, defaultValue) {
-    if (typeof value === "undefined") return defaultValue;
+    if (typeof value === "undefined") return _.isFunction(defaultValue) ? defaultValue() : defaultValue;
     return value;
   },
 
@@ -41,8 +41,8 @@ module.exports = {
     return value;
   },
 
-  stringify (value) {
-    return JSON.stringify(value);
+  stringify (value, pretty) {
+    return pretty ? JSON.stringify(value, null, 2) : JSON.stringify(value);
   }
 
 };

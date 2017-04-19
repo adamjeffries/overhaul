@@ -111,7 +111,7 @@ describe("Types", function () {
     it("Can Run", function () {
       var arr = [1, 2];
 
-      expect(t.array.value(arr)).to.be(arr);
+      expect(t.array.value(arr)).to.eql(arr);
       expect(function () {
         t.array.value("asdf");
       }).to.throwError();
@@ -275,10 +275,9 @@ describe("Traversals", function () {
       t.delete("a").value("asdf");
     }).to.throwError(/Object required to delete key/);
 
-    var o2 = t.key("a").delete.value({a: 1, b: 2});
-    expect(t.key("a").delete.value({a: 1, b: 2})).to.eql({b: 2});
+    expect(t.key("a").delete.parent.value({a: 1, b: 2})).to.eql({b: 2});
     expect(t.delete.value("asdf")).to.not.be.ok();
-    expect(t.index(1).delete.value([1,2,3])).to.eql([1,3]);
+    expect(t.index(1).delete.parent.value([1,2,3])).to.eql([1,3]);
   });
 
   it("Can get by index", function () {
@@ -324,6 +323,7 @@ describe("Modifiers", function () {
   it("Default", function () {
     expect(t.default("hello").value("anything")).to.be("anything");
     expect(t.default("hello").value()).to.be("hello");
+    expect(t.default(function () { return "hello"; }).value()).to.be("hello");
   });
 
   it("Can Freeze", function () {

@@ -39,13 +39,13 @@ module.exports = {
       }
     }
     if (!this.stack.length) return;
-    let s = this.stack.pop();
+    let s = this.stack[this.stack.length - 1];
     if (_.isArray(s.v)) {
       s.v.splice(s.k, 1);
-      return s.v;
+
     } else if (_.isObject(s.v)) {
       delete s.v[s.k];
-      return s.v;
+
     } else {
       throw "Cannot delete";
     }
@@ -88,7 +88,6 @@ module.exports = {
         last.v[keyA] = value;
         delete last.v[last.k];
         last.k = keyA;
-        return value;
 
       } else {
         throw "Parent expected to be an object";

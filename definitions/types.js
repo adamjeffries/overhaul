@@ -6,7 +6,7 @@ const _ = require("lodash");
 /**
  * Type Definitions
  */
-module.exports = {
+const TYPES = {
 
   arguments: {
     is: _.isArguments,
@@ -88,6 +88,29 @@ module.exports = {
       }
 
       return value;
+    },
+    fn (value, deep, extras) {
+      if (typeof value === "undefined") return;
+
+      // If Array, try to convert
+      if (_.isArray(value)) {
+        return TYPES.array.to.call(this, value, deep, extras);
+
+      } else {
+        let msg = "Expected " + (typeof value) + " to be an array";
+
+        //If a stack has been started - make a better error message
+        if (this.stack && this.stack.length) {
+          let last = _.last(this.stack);
+          if (_.isArray(last.v)) {
+            msg += " at index '" + last.k + "'";
+          } else if (_.isPlainObject(last.v)) {
+            msg += " for property '" + last.k + "'";
+          }
+        }
+
+        throw msg;
+      }
     }
   },
 
@@ -244,13 +267,15 @@ module.exports = {
 
           let omitted = {};
           Object.keys(deep).forEach(n => {
+            let keyValue = deep[n];
+
             if (deep[n] && _.isFunction(deep[n].value)) {
-              omitted[n] = value[n] = deep[n].value(value[n], this.stack.concat([{k: n, v: value}]));
+              keyValue = deep[n].value(value[n], this.stack.concat([{k: n, v: value}]));
             } else if (_.isFunction(deep[n])) {
-              omitted[n] = value[n] = deep[n](value[n], n, value);
-            } else {
-              omitted[n] = value[n] = deep[n];
+              keyValue = deep[n](value[n], n, value);
             }
+
+            if (typeof keyValue !== "undefined") omitted[n] = value[n] = keyValue;
           });
 
           if (extras === "reject" && Object.keys(value).length > Object.keys(deep).length) {
@@ -270,6 +295,29 @@ module.exports = {
       }
 
       return value;
+    },
+    fn (value, deep, extras) {
+      if (typeof value === "undefined") return;
+
+      // If Object, try to convert
+      if (_.isPlainObject(value)) {
+        return TYPES.object.to.call(this, value, deep, extras);
+
+      } else {
+        let msg = "Expected " + (typeof value) + " to be an object";
+
+        //If a stack has been started - make a better error message
+        if (this.stack && this.stack.length) {
+          let last = _.last(this.stack);
+          if (_.isArray(last.v)) {
+            msg += " at index '" + last.k + "'";
+          } else if (_.isPlainObject(last.v)) {
+            msg += " for property '" + last.k + "'";
+          }
+        }
+
+        throw msg;
+      }
     }
   },
 
@@ -294,3 +342,7 @@ module.exports = {
   }
 
 };
+
+
+
+module.exports = TYPES;
