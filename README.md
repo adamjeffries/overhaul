@@ -27,7 +27,25 @@
 
 ## Quick Start
 ```js
-const typedef = require("typedef.js");
+const t = require("typedef.js");
+
+let format = t.object({
+  id: t.required.toString.description("User Id"),
+  state: t.default("WA").values(["CA", "OR", "WA"]),
+  age: t.integer.within(10, 20).deprecated,
+  filter: t.object({
+    start: t.default(0).toNumber,
+    end: t.default(() => 5000).number
+  })
+});
+
+let req = format.value({
+  id: 123,
+  age: 15,
+  filter: {start: "100"}
+});
+
+// req === { id: '123', age: 15, state: 'WA', filter: { start: 100, end: 5000 } }
 ```
 
 
@@ -249,7 +267,7 @@ const typedef = require("typedef.js");
 
 ### Lodash
 
-https://lodash.com
+https://lodash.com/docs
 
 [↑ Back to top](#table-of-contents)
 
