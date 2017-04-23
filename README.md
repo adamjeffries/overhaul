@@ -1,7 +1,7 @@
-# typedef.js
-> JavaScript Type Definitions (Type Checking, Formatting, Annotations, & more)
+# Overhaul
+> Type Checking, Formatting, Annotations, & more
 
-[![npm version](https://badge.fury.io/js/typedef.js.svg)](https://badge.fury.io/js/typedef.js)
+[![npm version](https://badge.fury.io/js/overhaul.svg)](https://badge.fury.io/js/overhaul)
 
 
 
@@ -27,15 +27,15 @@
 
 ## Quick Start
 ```js
-const t = require("typedef.js");
+const oh = require("overhaul");
 
-let format = t.object({
-  id: t.required.toString.description("User Id"),
-  state: t.default("WA").values(["CA", "OR", "WA"]),
-  age: t.integer.within(10, 20).deprecated,
-  filter: t.object({
-    start: t.default(0).toNumber,
-    end: t.default(() => 5000).number
+let format = oh.object({
+  id: oh.required.toString.description("User Id"),
+  state: oh.default("WA").values(["CA", "OR", "WA"]),
+  age: oh.integer.within(10, 20).deprecated,
+  filter: oh.object({
+    start: oh.default(0).toNumber,
+    end: oh.default(() => 5000).number
   })
 });
 
@@ -273,13 +273,13 @@ https://lodash.com/docs
 
 ## Installation
 ```bash
-npm install --save typedef.js
+npm install --save overhaul
 ```
 
 [↑ Back to top](#table-of-contents)
 
 ## License
 
-typedef.js is licensed under the [MIT license](LICENSE.md).
+overhaul is licensed under the [MIT license](LICENSE.md).
 
 [↑ Back to top](#table-of-contents)

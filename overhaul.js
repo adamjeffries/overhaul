@@ -22,17 +22,17 @@ let getArgumentNames = function (fn) {
 
 
 /**
- * Typedef (Chainable Instance)
+ * Overhaul (Chainable Instance)
  */
-let TypeDef = chainable();
+let Overhaul = chainable();
 
 
 
 /**
  * Value - support stack (k, v)
  */
-let originalValue = TypeDef.prototype.value;
-TypeDef.prototype.value = function (value, stack) {
+let originalValue = Overhaul.prototype.value;
+Overhaul.prototype.value = function (value, stack) {
   this._context.stack = stack || [];
   return originalValue.call(this, value);
 };
@@ -42,10 +42,10 @@ TypeDef.prototype.value = function (value, stack) {
 /**
  * Upgrade the default register to support (name, {is, to, fn})
  */
-let register = TypeDef.register;
-TypeDef.register = function (name, fn, argNames) {
+let register = Overhaul.register;
+Overhaul.register = function (name, fn, argNames) {
   if (_.isPlainObject(name)) {
-    Object.keys(name).forEach(n => TypeDef.register(n, name[n]));
+    Object.keys(name).forEach(n => Overhaul.register(n, name[n]));
 
   } else if (_.isPlainObject(fn) && (fn.is || fn.to || fn.fn)) {
 
@@ -80,11 +80,11 @@ TypeDef.register = function (name, fn, argNames) {
 
     // FN - custom definition
     if (_.isFunction(fn.fn)) {
-      TypeDef.register(name, fn.fn);
+      Overhaul.register(name, fn.fn);
 
     // Generic FN - Use "IS" and throw
     } else if (is) {
-      TypeDef.register(name, function (value) {
+      Overhaul.register(name, function (value) {
         if (typeof value === "undefined") return;
 
         // Check "is" without any safety nets
@@ -117,7 +117,7 @@ TypeDef.register = function (name, fn, argNames) {
     }, argNames || getArgumentNames(fn).slice(1));
   }
 
-  return TypeDef;
+  return Overhaul;
 };
 
 
@@ -125,7 +125,7 @@ TypeDef.register = function (name, fn, argNames) {
 /**
  * Basic Tester
  */
-TypeDef.register("test", function (value, fn) {
+Overhaul.register("test", function (value, fn) {
   if (_.isFunction(fn)) {
     let rtn = fn(value);
     if (typeof rtn === "string") {
@@ -143,7 +143,7 @@ TypeDef.register("test", function (value, fn) {
 /**
  * Basic Value Tester
  */
-TypeDef.register("is", function (value, fn) {
+Overhaul.register("is", function (value, fn) {
   try {
     if (_.isFunction(fn)) return !!fn(value);
     return (value instanceof fn) || (value === fn);
@@ -157,7 +157,7 @@ TypeDef.register("is", function (value, fn) {
 /**
  * Basic Type Caster
  */
-TypeDef.register("to", function (value, fn) {
+Overhaul.register("to", function (value, fn) {
   try {
     return _.isFunction(fn) ? fn(value) : value;
   } catch (e) {}
@@ -165,4 +165,4 @@ TypeDef.register("to", function (value, fn) {
 
 
 
-module.exports = TypeDef;
+module.exports = Overhaul;
