@@ -1,6 +1,7 @@
 "use strict";
 
-const _ = require("lodash");
+const _ = require("lodash"),
+  settings = require("../settings");
 
 
 /**
@@ -219,21 +220,22 @@ const TYPES = {
 
       if (deep) {
         if (_.isPlainObject(deep)) {
-          if ((extras === false || extras === "reject") && keys.length !== Object.keys(deep).length) return false;
 
-          return keys.every((n, i) => {
-            if (!(n in deep)) {
-              return !(extras === false || extras === "reject");
+          let numMatches = 0;
 
-            } else if (deep[n] && _.isFunction(deep[n].value)) {
-              return !!deep[n].value(value[n], this.stack.concat([{k: n, v: value}]));
-
-            } else if (_.isFunction(deep[n])) {
-              return !!deep[n](value[n], n, value);
+          let checkKey = (key, fn) => {
+            if (key in value) numMatches++;
+            if (fn && _.isFunction(fn.value)) {
+              return !!fn.value(value[key], this.stack.concat([{k: key, v: value}]));
+            } else if (_.isFunction(fn)) {
+              return !!fn(value[key], key, value);
             }
+          };
 
-            return false;
-          });
+          return Object.keys(deep).every(dk => {
+            if (!settings.multiKeyDelimiter) return checkKey(dk, deep[dk]);
+            return dk.split(settings.multiKeyDelimiter).every(mdk => checkKey(mdk.trim(), deep[dk]));
+          }) && (!(extras === false || extras === "reject") || numMatches === keys.length);
 
         } else if (_.isFunction(deep.value)) {
           return keys.every(n => !!deep.value(value[n], this.stack.concat([{k: n, v: value}])));
@@ -247,42 +249,49 @@ const TYPES = {
     },
     to (value, deep, extras) { // extras=allow(default), omit(false), reject
       if (!_.isPlainObject(value)) value = _.toPlainObject(value);
+      if (!deep || !_.isPlainObject(value)) return value;
 
-      if (deep && _.isPlainObject(value)) {
-        let keys = Object.keys(value);
+      let updatedValue = Object.assign({}, value); // Clone
+      let keys = Object.keys(value);
 
-        if (_.isPlainObject(deep)) {
+      if (_.isPlainObject(deep)) {
 
-          let omitted = {};
-          Object.keys(deep).forEach(n => {
-            let keyValue = deep[n];
+        let omitted = {};
+        let count = 0;
 
-            if (deep[n] && _.isFunction(deep[n].value)) {
-              keyValue = deep[n].value(value[n], this.stack.concat([{k: n, v: value}]));
-            } else if (_.isFunction(deep[n])) {
-              keyValue = deep[n](value[n], n, value);
-            }
-
-            if (typeof keyValue !== "undefined") omitted[n] = value[n] = keyValue;
-          });
-
-          if (extras === "reject" && Object.keys(value).length > Object.keys(deep).length) {
-            throw "Object contains unapproved keys";
-          } else if (extras === "omit" || extras === false) {
-            return omitted;
+        let formatValue = (key, keyValue) => {
+          count++;
+          
+          if (keyValue && _.isFunction(keyValue.value)) {
+            keyValue = keyValue.value(value[key], this.stack.concat([{k: key, v: updatedValue}]));
+          } else if (_.isFunction(keyValue)) {
+            keyValue = keyValue(value[key], key, updatedValue);
           }
 
-        } else if (_.isFunction(deep.value)) {
-          keys.forEach(n => {
-            value[n] = deep.value(value[n], this.stack.concat([{k: n, v: value}]));
-          });
+          if (typeof keyValue !== "undefined") omitted[key] = updatedValue[key] = keyValue;
+        };
 
-        } else if (_.isFunction(deep)) {
-          keys.forEach(n => value[n] = deep(value[n], n, value));
+        Object.keys(deep).forEach(dk => {
+          if (!settings.multiKeyDelimiter) return formatValue(dk, deep[dk]);
+          dk.split(settings.multiKeyDelimiter).forEach(mdk => formatValue(mdk.trim(), deep[dk]));
+        });
+
+        if (extras === "reject" && keys.length > count) {
+          throw "Object contains unapproved keys";
+        } else if (extras === "omit" || extras === false) {
+          return omitted;
         }
+
+      } else if (_.isFunction(deep.value)) {
+        keys.forEach(n => {
+          updatedValue[n] = deep.value(value[n], this.stack.concat([{k: n, v: updatedValue}]));
+        });
+
+      } else if (_.isFunction(deep)) {
+        keys.forEach(n => updatedValue[n] = deep(value[n], n, updatedValue));
       }
 
-      return value;
+      return updatedValue;
     },
     fn (value, deep, extras) {
       if (typeof value === "undefined") return;

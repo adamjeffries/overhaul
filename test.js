@@ -4,6 +4,7 @@ const expect = require("expect.js"),
   oh = require("./index");
 
 
+
 describe("Types", function () {
 
   describe("register", function () {
@@ -205,8 +206,10 @@ describe("Types", function () {
       expect(oh.isObject(oh.number).value({a: 1, b: 2})).to.be(true);
       expect(oh.isObject(oh.number).value({a: 1, b: "2"})).to.be(false);
       expect(oh.isObject({a: oh.isString, b: oh.isNumber, c: oh.isBoolean}).value({a: "a", b: 1, c: false, d: 2})).to.be(true);
+      expect(oh.isObject({"a,b,c": oh.isNumber, d: oh.isString}).value({a: 1.2, b: 23, c: 4.56, d: "a"})).to.be(true);
       expect(oh.isObject({a: oh.isString, b: oh.isNumber, c: oh.isBoolean}, false).value({a: "a", b: 1, c: false, d: 2})).to.be(false);
       expect(oh.isObject({a: oh.isString, b: oh.isNumber, c: oh.isBoolean}, false).value({a: "a", c: false, d: 2})).to.be(false);
+      expect(oh.isObject({"a,b,c": oh.isNumber, d: oh.isString}).value({a: 1.2, b: "23", c: 4.56, d: "a"})).to.be(false);
     });
 
     it("Can Cast", function () {
@@ -214,7 +217,7 @@ describe("Types", function () {
       Foo.prototype.b = 2;
       var o = {a: 1};
 
-      expect(oh.toObject.value(o)).to.be(o);
+      expect(oh.toObject.value(o)).to.eql(o);
       expect(oh.toObject.value(new Foo())).to.eql({a: 1, b: 2});
       expect(oh.toObject.value("abc")).to.eql({"0": "a", "1": "b", "2": "c"});
       expect(oh.toObject.value([1,2,3])).to.eql({"0": 1, "1": 2, "2": 3});
@@ -241,6 +244,12 @@ describe("Types", function () {
 
       var o4 = oh.toObject({a: oh.toNumber, b: oh.toString, c: oh.toBoolean}, "reject").value({a: "1", b: 2, c: "three", d: 5});
       expect(o4).to.not.be.ok();
+
+      var o5 = oh.toObject({"a,b,c": oh.toString, d: oh.toNumber}).value({a: "1", b: 2, c: false, d: "5"});
+      expect(o5.a).to.eql("1");
+      expect(o5.b).to.eql("2");
+      expect(o5.c).to.eql("false");
+      expect(o5.d).to.eql(5);
     });
 
     it("Can Run", function () {

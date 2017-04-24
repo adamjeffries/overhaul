@@ -8,7 +8,7 @@ oh.register(require("./definitions/traversals"));
 oh.register(require("./definitions/annotations"));
 oh.register(require("./definitions/modifiers"));
 
-// Lodash - prevent overriding existing methods
+// Lodash - prevent overriding existing definitions
 let lodash = require("./definitions/lodash");
 Object.keys(lodash).forEach(name => {
   if (name in oh) return;

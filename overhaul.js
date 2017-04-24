@@ -1,6 +1,7 @@
 "use strict";
 
 const chainable = require("chainable.js"),
+  settings = require("./settings"),
   _ = require("lodash");
 
 
@@ -25,7 +26,7 @@ let getArgumentNames = function (fn) {
  * Overhaul (Chainable Instance)
  */
 let Overhaul = chainable();
-
+Overhaul.settings = settings;
 
 
 /**
