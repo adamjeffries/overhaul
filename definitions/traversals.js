@@ -88,6 +88,7 @@ module.exports = {
         last.v[keyA] = value;
         delete last.v[last.k];
         last.k = keyA;
+        return value;
 
       } else {
         throw "Parent expected to be an object";
