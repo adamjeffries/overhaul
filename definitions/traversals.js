@@ -74,8 +74,11 @@ module.exports = {
   move (value, keyA, keyB) {
     if (arguments.length === 3) { // Move object from a to b
       if (_.isObject(value)) {
-        value[keyB] = value[keyA];
-        delete value[keyA];
+        if (keyA in value) {
+          value[keyB] = value[keyA];
+          delete value[keyA];
+        }
+        
         return value;
 
       } else {
@@ -85,8 +88,13 @@ module.exports = {
     } else if (arguments.length === 2) { // Assume parent exists and value is the current key
       let last = this.stack[this.stack.length - 1];
       if (last && _.isObject(last.v)) {
-        last.v[keyA] = value;
-        delete last.v[last.k];
+        if (last.k in last.v) {
+          last.v[keyA] = value;
+          delete last.v[last.k];
+        } else if (keyA in last.v) {
+          value = last.v[keyA];
+        }
+        
         last.k = keyA;
         return value;
 

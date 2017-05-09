@@ -263,7 +263,9 @@ const TYPES = {
           count++;
           
           if (keyValue && _.isFunction(keyValue.value)) {
-            keyValue = keyValue.value(value[key], this.stack.concat([{k: key, v: updatedValue}]));
+            let stackItem = {k: key, v: updatedValue};
+            keyValue = keyValue.value(value[key], this.stack.concat([stackItem]));
+            key = stackItem.k;
           } else if (_.isFunction(keyValue)) {
             keyValue = keyValue(value[key], key, updatedValue);
           }
