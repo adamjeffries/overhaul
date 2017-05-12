@@ -142,7 +142,25 @@ let req = format.value({
 #### Object (Plain Object)
 
 ``` javascript
+//Shortcut
+oh.object({
+  id: oh.string,
+  filter: oh.object({
+    start: oh.number,
+    end: oh.number
+  })
+})
 
+// Is equivalent to:
+oh.object({
+  id: oh.string,
+  filter: {
+    start: oh.number,
+    end: oh.number
+  }
+})
+
+// oh.object is implied if inner key value is a plain object
 ```
 
 #### RegExp

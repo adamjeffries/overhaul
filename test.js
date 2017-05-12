@@ -309,9 +309,9 @@ describe("Traversals", function () {
 
   it("Can Move", function () {
     expect(oh.move("a", "c").value({a: 1, b: 2})).to.eql({b: 2, c: 1});
-    expect(oh.move("a", "c").value({b: 2})).to.eql({b: 2, c: undefined});
+    expect(oh.move("a", "c").value({b: 2})).to.eql({b: 2});
     expect(oh.key("a").move("c").parent.value({a: 1, b: 2})).to.eql({b: 2, c: 1});
-    expect(oh.key("a").move("c").parent.value({b: 2})).to.eql({b: 2, c: undefined});
+    expect(oh.key("a").move("c").parent.value({b: 2})).to.eql({b: 2});
   });
 
   it("Can get parent", function () {

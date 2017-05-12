@@ -1,7 +1,9 @@
 "use strict";
 
 const _ = require("lodash"),
-  settings = require("../settings");
+  settings = require("./settings"),
+  oh = require("./overhaul");
+
 
 
 /**
@@ -229,6 +231,8 @@ const TYPES = {
               return !!fn.value(value[key], this.stack.concat([{k: key, v: value}]));
             } else if (_.isFunction(fn)) {
               return !!fn(value[key], key, value);
+            } else if (_.isPlainObject(fn)) {
+              return !!oh.object(fn).value(value[key], this.stack.concat([{k: key, v: value}]));
             }
           };
 
@@ -268,6 +272,10 @@ const TYPES = {
             key = stackItem.k;
           } else if (_.isFunction(keyValue)) {
             keyValue = keyValue(value[key], key, updatedValue);
+          } else if (keyValue && _.isPlainObject(keyValue)) {
+            let stackItem = {k: key, v: updatedValue};
+            keyValue = oh.object(keyValue).value(value[key], this.stack.concat([stackItem]));
+            key = stackItem.k;
           }
 
           if (typeof keyValue !== "undefined") omitted[key] = updatedValue[key] = keyValue;

@@ -1,6 +1,6 @@
 {
   "name": "overhaul",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Type Definitions",
   "main": "index.js",
   "scripts": {

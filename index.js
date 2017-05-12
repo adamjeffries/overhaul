@@ -1,15 +1,15 @@
 "use strict";
 
-const oh = require("./overhaul");
+const oh = require("./src/overhaul");
 
 // Register Definitions
-oh.register(require("./definitions/types"));
-oh.register(require("./definitions/traversals"));
-oh.register(require("./definitions/annotations"));
-oh.register(require("./definitions/modifiers"));
+oh.register(require("./src/types"));
+oh.register(require("./src/traversals"));
+oh.register(require("./src/annotations"));
+oh.register(require("./src/modifiers"));
 
 // Lodash - prevent overriding existing definitions
-let lodash = require("./definitions/lodash");
+let lodash = require("./src/lodash");
 Object.keys(lodash).forEach(name => {
   if (name in oh) return;
   oh.register(name, lodash[name]);
